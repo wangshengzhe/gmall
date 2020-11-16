@@ -1,20 +1,17 @@
 package com.atguigu.gmall.pms.controller;
 
-import java.util.Arrays;
-import java.util.Map;
-
-
 import com.atguigu.core.bean.PageVo;
 import com.atguigu.core.bean.QueryCondition;
 import com.atguigu.core.bean.Resp;
+import com.atguigu.gmall.pms.entity.AttrEntity;
+import com.atguigu.gmall.pms.service.AttrService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import com.atguigu.gmall.pms.entity.AttrEntity;
-import com.atguigu.gmall.pms.service.AttrService;
+import java.util.Arrays;
 
 
 
@@ -33,6 +30,15 @@ public class AttrController {
     @Autowired
     private AttrService attrService;
 
+    /**
+     * 业务3    pms_attr
+     */
+    @GetMapping//type=1 基本属性
+    public Resp<PageVo> queryAttrsByCid(QueryCondition condition, @RequestParam("cid")Long cid111, @RequestParam(value = "type", defaultValue = "1")Integer type){
+        PageVo page = attrService.queryAttrsByCid(condition, cid111, type);
+
+        return Resp.ok(page);
+    }
     /**
      * 列表
      */
