@@ -4,6 +4,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+
+//通用的响应数据
 @ApiModel
 @Data
 public class Resp<T> {

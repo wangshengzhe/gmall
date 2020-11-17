@@ -1,5 +1,5 @@
 **项目说明** 
-- guli-generator是基于guli-generator(谷粒开源项目)的代码生成器，
+- guli-generator是基于renren-generator(谷粒开源项目)的代码生成器，
  可在线生成entity、xml、dao、service、html、js、sql代码，减少70%以上的开发任务
 <br> 
 

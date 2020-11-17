@@ -1,7 +1,6 @@
 package com.atguigu.gmall.pms.config;
 
 import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
-import com.baomidou.mybatisplus.extension.plugins.pagination.optimize.JsqlParserCountOptimize;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -9,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
  * @author pakchoi
  * @create 2020-09-25-21:38
  */
-@Configuration
+@Configuration  //mp的分页插件
 public class MybatisPlusConfig {
     @Bean
     public PaginationInterceptor paginationInterceptor() {
