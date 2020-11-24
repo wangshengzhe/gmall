@@ -23,10 +23,11 @@ import java.util.List;
  * @email lxf@atguigu.com
  * @date 2020-09-10 22:34:03
  */
-@Api(tags = "商品三级分类 管理")
-@RestController
+@Api(tags = "商品三级分类管理")
+@RestController//http://127.0.0.1:8888/pms/category?t=1606134959329&level=0
 @RequestMapping("pms/category")
 public class CategoryController {
+
     @Autowired
     private CategoryService categoryService;
 
@@ -43,7 +44,9 @@ public class CategoryController {
         if (pid111 != null) {
             wrapper.eq("parent_cid", pid111);
         }
+
         List<CategoryEntity> categoryEntities = categoryService.list(wrapper);
+        System.out.println("干干干");
         return Resp.ok(categoryEntities);
     }
 

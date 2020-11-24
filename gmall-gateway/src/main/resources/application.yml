@@ -27,3 +27,6 @@ spring:
           uri: lb://sms-service
           predicates:
             - Path=/sms/**
+
+
+

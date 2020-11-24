@@ -5,6 +5,7 @@ import com.atguigu.core.bean.QueryCondition;
 import com.atguigu.core.bean.Resp;
 import com.atguigu.gmall.pms.entity.AttrGroupEntity;
 import com.atguigu.gmall.pms.service.AttrGroupService;
+import com.atguigu.gmall.pms.vo.GroupVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -25,8 +27,31 @@ import java.util.Arrays;
 @RestController
 @RequestMapping("pms/attrgroup")
 public class AttrGroupController {
+
     @Autowired
+
     private AttrGroupService attrGroupService;
+    /**
+     * 根据三级分类id查询分组--中间表---组下的规格参数
+     *正确响应：自定义的GroupVO对象，java<json 不用管就是null
+     */
+
+    @ApiOperation("根据三级分类id查询分组及组下的规格参数")
+    @GetMapping("/withattrs/cat/{catId}")
+    public Resp<List<GroupVO>> queryByCid(@PathVariable("catId")Long cid){
+
+        List<GroupVO> groupVOs = this.attrGroupService.queryGroupWithAttrsByCid(cid);
+        return Resp.ok(groupVOs);
+    }
+    /**
+     *正确响应：自定义的GroupVO对象，涉及三张表，属性分组、中间表、属性表。
+     */
+    @ApiOperation("根据分组id查询属性组及该组的规格参数")
+    @GetMapping("withattr/{gid}")//http://127.0.0.1:8888/pms/attrgroup/withattr/2
+    public Resp<GroupVO> queryGroupWithAttrsByGid(@PathVariable("gid")Long gid){
+       GroupVO groupVO = this.attrGroupService.queryGroupWithAttrsByGid(gid);
+        return Resp.ok(groupVO);
+    }
 
     /**
      * 属性分组

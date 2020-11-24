@@ -5,6 +5,7 @@ import com.atguigu.core.bean.QueryCondition;
 import com.atguigu.core.bean.Resp;
 import com.atguigu.gmall.pms.entity.AttrEntity;
 import com.atguigu.gmall.pms.service.AttrService;
+import com.atguigu.gmall.pms.vo.AttrVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +32,11 @@ public class AttrController {
     private AttrService attrService;
 
     /**
-     * 业务3    pms_attr
+     * 业务3    pms_attr  type=1 基本属性
+     * http://127.0.0.1:8888/pms/attr?type=1&cid=225
      */
-    @GetMapping//type=1 基本属性
+    @ApiOperation("根据分类id查询规格参数")
+    @GetMapping//
     public Resp<PageVo> queryAttrsByCid(QueryCondition condition, @RequestParam("cid")Long cid111, @RequestParam(value = "type", defaultValue = "1")Integer type){
         PageVo page = attrService.queryAttrsByCid(condition, cid111, type);
 
@@ -65,14 +68,14 @@ public class AttrController {
     }
 
     /**
-     * 保存
+     * 保存属性，同时保存属性和属性分组的中间表
      */
-    @ApiOperation("保存")
+    @ApiOperation("保存属性，同时保存属性和属性分组的中间表")
     @PostMapping("/save")
     @PreAuthorize("hasAuthority('pms:attr:save')")
-    public Resp<Object> save(@RequestBody AttrEntity attr){
-		attrService.save(attr);
+    public Resp<Object> save(@RequestBody AttrVO attrVO){//参数是json字符串
 
+        this.attrService.saveAttr(attrVO);
         return Resp.ok(null);
     }
 

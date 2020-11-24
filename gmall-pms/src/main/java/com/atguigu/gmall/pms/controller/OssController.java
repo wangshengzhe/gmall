@@ -20,7 +20,7 @@ import java.util.Map;
  * @create 2020-09-27-17:41
  */
 @RequestMapping("pms/oss")
-@RestController
+@RestController//@RestController注解相当于@ResponseBody ＋ @Controller合在一起的作用。
 public class OssController {
 
     String accessId = "LTAI4Fhnddx4H6WVS4xXSxXF"; // 请填写您的AccessKeyId。

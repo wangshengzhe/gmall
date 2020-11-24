@@ -1,20 +1,18 @@
 package com.atguigu.gmall.pms.controller;
 
-import java.util.Arrays;
-import java.util.Map;
-
-
 import com.atguigu.core.bean.PageVo;
 import com.atguigu.core.bean.QueryCondition;
 import com.atguigu.core.bean.Resp;
+import com.atguigu.gmall.pms.entity.SpuInfoEntity;
+import com.atguigu.gmall.pms.service.SpuInfoService;
+import com.atguigu.gmall.pms.vo.SpuInfoVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import com.atguigu.gmall.pms.entity.SpuInfoEntity;
-import com.atguigu.gmall.pms.service.SpuInfoService;
+import java.util.Arrays;
 
 
 
@@ -26,12 +24,26 @@ import com.atguigu.gmall.pms.service.SpuInfoService;
  * @email lxf@atguigu.com
  * @date 2020-09-10 22:34:03
  */
+
+
+
+
 @Api(tags = "spu信息 管理")
 @RestController
 @RequestMapping("pms/spuinfo")
 public class SpuInfoController {
     @Autowired
     private SpuInfoService spuInfoService;
+
+
+
+    @ApiOperation("根据分类id查询spu商品信息")//没有使用elk是mysql的模糊查询
+    @GetMapping//http://127.0.0.1:8888/pms/spuinfo?t=1606121691107&page=1&limit=10&key=&catId=225
+    public Resp<PageVo> querySpuInfo(QueryCondition condition, @RequestParam("catId")Long cid){
+        //SELECT * FROM `pms_spu_info` WHERE catalog_id =225 AND (id=3 OR spu_name LIKE "%华为%");
+        PageVo page = this.spuInfoService.querySpuInfo(condition, cid);
+        return Resp.ok(page);
+    }
 
     /**
      * 列表
@@ -59,14 +71,13 @@ public class SpuInfoController {
     }
 
     /**
-     * 保存
+     * 大保存 复杂
      */
-    @ApiOperation("保存")
+    @ApiOperation("保存spu")
     @PostMapping("/save")
-    @PreAuthorize("hasAuthority('pms:spuinfo:save')")
-    public Resp<Object> save(@RequestBody SpuInfoEntity spuInfo){
-		spuInfoService.save(spuInfo);
-
+    @PreAuthorize("hasAuthority('pms:spuinfo:save')")//security的注解
+    public Resp<Object> save(@RequestBody SpuInfoVO spuInfoVO){
+		spuInfoService.bigSave(spuInfoVO);//九张表
         return Resp.ok(null);
     }
 

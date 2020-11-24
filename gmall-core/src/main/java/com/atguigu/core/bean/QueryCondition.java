@@ -4,7 +4,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-//查询条件
+//查询条件：ep http://127.0.0.1:8888/pms/spuinfo?t=1606121691107&page=1&limit=10&key=&catId=225
 @ApiModel
 @Data
 public class QueryCondition {
@@ -24,4 +24,8 @@ public class QueryCondition {
 
     @ApiModelProperty(name = "asc",value = "系统默认排序",required = false)
     private String asc = "asc";
+
+    @ApiModelProperty(name = "key",value = "搜索关键字",required = false)
+    private String key;
+
 }
