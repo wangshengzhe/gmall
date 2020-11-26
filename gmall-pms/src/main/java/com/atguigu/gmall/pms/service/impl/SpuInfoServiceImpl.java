@@ -8,10 +8,7 @@ import com.atguigu.gmall.pms.dao.SpuInfoDao;
 import com.atguigu.gmall.pms.dao.SpuInfoDescDao;
 import com.atguigu.gmall.pms.entity.*;
 import com.atguigu.gmall.pms.feign.GmallSmsClient;
-import com.atguigu.gmall.pms.service.ProductAttrValueService;
-import com.atguigu.gmall.pms.service.SkuImagesService;
-import com.atguigu.gmall.pms.service.SkuSaleAttrValueService;
-import com.atguigu.gmall.pms.service.SpuInfoService;
+import com.atguigu.gmall.pms.service.*;
 import com.atguigu.gmall.pms.vo.BaseAttrVO;
 import com.atguigu.gmall.pms.vo.SkuInfoVO;
 import com.atguigu.gmall.pms.vo.SpuInfoVO;
@@ -19,15 +16,22 @@ import com.atguigu.sms.vo.SkuSaleVO;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import io.seata.spring.annotation.GlobalTransactional;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
@@ -46,6 +50,8 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     private SkuSaleAttrValueService saleAttrValueService;
     @Autowired
     private GmallSmsClient gmallSmsClient;
+    @Autowired
+    private SpuInfoDescService spuInfoDescService;
 
 
     @Override
@@ -80,33 +86,37 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
 
     @Override
-    public void bigSave(SpuInfoVO spuInfoVO) {
+//    @Transactional(rollbackFor = FileNotFoundException.class,noRollbackFor = ArithmeticException.class)
+//    @Transactional(timeout = 3)
+//    @Transactional(readOnly = true)
+    @GlobalTransactional
+    public void bigSave(SpuInfoVO spuInfoVO) throws FileNotFoundException {
         // 1.保存spu相关的3张表
         // 1.1保存pms_spu_info信息
-        spuInfoVO.setCreateTime(new Date());
-        spuInfoVO.setUodateTime(spuInfoVO.getCreateTime());//vs mp的自动更新时间
-        this.save(spuInfoVO);//因为spuInfoVO是继承的。形参支持多态
-        Long spuId = spuInfoVO.getId();
-        // 1.2. 保存pms_spu_info_desc 就是大图片 两个字段 id desc
-        List<String> spuImages = spuInfoVO.getSpuImages();
-        if (!CollectionUtils.isEmpty(spuImages)) {//减小数据库io
-            SpuInfoDescEntity descEntity = new SpuInfoDescEntity();
-            descEntity.setSpuId(spuId);
-            descEntity.setDecript(StringUtils.join(spuImages, ","));
-            this.descDao.insert(descEntity);
-        }
-        // 1.3. 保存pms_product_attr_value
-        List<BaseAttrVO> baseAttrs = spuInfoVO.getBaseAttrs();
-        if (!CollectionUtils.isEmpty(baseAttrs)) {
-            List<ProductAttrValueEntity> attrValueEntities = baseAttrs.stream().map(baseAttrVO -> {
-                ProductAttrValueEntity attrValueEntity = baseAttrVO;
-                attrValueEntity.setSpuId(spuId);
-                return attrValueEntity;
-            }).collect(Collectors.toList());
-            this.attrValueService.saveBatch(attrValueEntities);
-        }
+        Long spuId = saveSpuInfo(spuInfoVO);
 
-        // 2.保存sku相关的3张表
+        // 1.2. 保存pms_spu_info_desc 就是大图片 两个字段 id desc
+//        this.saveSpuInfoDesc(spuInfoVO, spuId);//相同service+REQUIRES_NEW事务传播无效
+        this.spuInfoDescService.saveSpuInfoDesc(spuInfoVO, spuId);//不同service+REQUIRES_NEW 事务传播有效
+//        int a = 1 / 0;//测试事务传播
+//        new FileInputStream(new File("xxxx"));//编译期异常，默认不回滚，尽管控制台报异常了
+//        try {
+//            TimeUnit.SECONDS.sleep(4);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+
+
+        // 1.3. 保存pms_product_attr_value
+        saveBaseAttrValue(spuInfoVO, spuId);
+
+
+        // 2.保存sku相关的3张表 + 3.保存营销信息的三张表  跨模块  openfeign
+        saveSkuAndSale(spuInfoVO, spuId);
+        //        int a = 1 / 0;//测试分布式事务
+    }
+
+    private void saveSkuAndSale(SpuInfoVO spuInfoVO, Long spuId) {
         List<SkuInfoVO> skus = spuInfoVO.getSkus();
         if (CollectionUtils.isEmpty(skus)) {
             return;//spu没有sku
@@ -157,7 +167,38 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             skuSaleVO.setSkuId(skuId);
             this.gmallSmsClient.saveSale(skuSaleVO);
         });
+    }
+
+    private void saveBaseAttrValue(SpuInfoVO spuInfoVO, Long spuId) {
+        List<BaseAttrVO> baseAttrs = spuInfoVO.getBaseAttrs();
+        if (!CollectionUtils.isEmpty(baseAttrs)) {
+            List<ProductAttrValueEntity> attrValueEntities = baseAttrs.stream().map(baseAttrVO -> {
+                ProductAttrValueEntity attrValueEntity = baseAttrVO;
+                attrValueEntity.setSpuId(spuId);
+                return attrValueEntity;
+            }).collect(Collectors.toList());
+            this.attrValueService.saveBatch(attrValueEntities);
+        }
+    }
 
 
+//    @Transactional(propagation = Propagation.REQUIRES_NEW)//基于接口的动态代理，
+    @Transactional
+    public void saveSpuInfoDesc(SpuInfoVO spuInfoVO, Long spuId) {
+        List<String> spuImages = spuInfoVO.getSpuImages();
+        if (!CollectionUtils.isEmpty(spuImages)) {//减小数据库io
+            SpuInfoDescEntity descEntity = new SpuInfoDescEntity();
+            descEntity.setSpuId(spuId);
+            descEntity.setDecript(StringUtils.join(spuImages, ","));
+            this.descDao.insert(descEntity);
+        }
+    }
+
+
+    private Long saveSpuInfo(SpuInfoVO spuInfoVO) {
+        spuInfoVO.setCreateTime(new Date());
+        spuInfoVO.setUodateTime(spuInfoVO.getCreateTime());//vs mp的自动更新时间
+        this.save(spuInfoVO);//因为spuInfoVO是继承的。形参支持多态
+        return spuInfoVO.getId();
     }
 }

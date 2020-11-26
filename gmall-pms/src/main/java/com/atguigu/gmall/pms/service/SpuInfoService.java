@@ -6,6 +6,8 @@ import com.atguigu.gmall.pms.entity.SpuInfoEntity;
 import com.atguigu.core.bean.PageVo;
 import com.atguigu.core.bean.QueryCondition;
 
+import java.io.FileNotFoundException;
+
 
 /**
  * spu信息
@@ -20,6 +22,8 @@ public interface SpuInfoService extends IService<SpuInfoEntity> {
 
     PageVo querySpuInfo(QueryCondition condition, Long catId);
 
-    void bigSave(SpuInfoVO spuInfoVO);
+    void bigSave(SpuInfoVO spuInfoVO) throws FileNotFoundException;
+
+//    void saveSpuInfoDesc(SpuInfoVO spuInfoVO, Long spuId);//同一个service没有事务传播的
 }
 

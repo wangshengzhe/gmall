@@ -18,7 +18,7 @@ public class BaseAttrVO extends ProductAttrValueEntity {
 
     public void setValueSelected(List<String> selected){//没有声明valueSelected属性也可以的。
 
-        if (CollectionUtils.isEmpty(selected)) {
+        if (CollectionUtils.isEmpty(selected)) {// 如果接受的集合为空，则不设置
             return ;
         }
         this.setAttrValue(StringUtils.join(selected, ","));//将list<string>转变为string

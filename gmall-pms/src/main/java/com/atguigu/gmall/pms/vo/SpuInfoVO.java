@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 public class SpuInfoVO extends SpuInfoEntity {
 
-    private List<String> spuImages;
+    private List<String> spuImages;//spu的图像就是商品介绍的里的大图片。
 
     private List<BaseAttrVO> baseAttrs;//product_attr_value
 

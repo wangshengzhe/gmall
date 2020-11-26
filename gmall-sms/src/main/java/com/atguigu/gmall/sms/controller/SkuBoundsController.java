@@ -11,7 +11,6 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Arrays;
 
 
@@ -36,7 +35,6 @@ public class SkuBoundsController {
     public Resp<Object> saveSale(@RequestBody SkuSaleVO skuSaleVO){
         skuBoundsService.saveSale(skuSaleVO);
         return Resp.ok(null);
-
     }
 
     /**
@@ -47,7 +45,6 @@ public class SkuBoundsController {
     @PreAuthorize("hasAuthority('sms:skubounds:list')")
     public Resp<PageVo> list(QueryCondition queryCondition) {
         PageVo page = skuBoundsService.queryPage(queryCondition);
-
         return Resp.ok(page);
     }
 
@@ -96,7 +93,6 @@ public class SkuBoundsController {
     @PreAuthorize("hasAuthority('sms:skubounds:delete')")
     public Resp<Object> delete(@RequestBody Long[] ids){
 		skuBoundsService.removeByIds(Arrays.asList(ids));
-
         return Resp.ok(null);
     }
 

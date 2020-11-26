@@ -25,7 +25,7 @@ public class SpuInfoDescEntity implements Serializable {
 	/**
 	 * 商品id
 	 */
-	@TableId(type= IdType.INPUT)
+	@TableId(type= IdType.INPUT)//原来是默认的
 	@ApiModelProperty(name = "spuId",value = "商品id")
 	private Long spuId;
 	/**

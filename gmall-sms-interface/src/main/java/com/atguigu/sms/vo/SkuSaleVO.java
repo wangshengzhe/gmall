@@ -22,7 +22,7 @@ public class SkuSaleVO {
     // 打折相关的字段
     private Integer fullCount;
     private BigDecimal discount;
-    private Integer ladderAddOther;//注意和json一致
+    private Integer ladderAddOther;//注意和json一致，是否叠加其他优惠[0-不可叠加，1-可叠加]
 
     // 满减相关的字段
     private BigDecimal fullPrice;

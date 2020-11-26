@@ -10,5 +10,4 @@ package com.atguigu.gmall.pms.feign;
 @FeignClient("sms-service")
 public interface GmallSmsClient extends GmallSmsApi {
 
-
 }

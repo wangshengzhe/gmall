@@ -12,9 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.FileNotFoundException;
 import java.util.Arrays;
-
-
 
 
 /**
@@ -26,8 +25,6 @@ import java.util.Arrays;
  */
 
 
-
-
 @Api(tags = "spu信息 管理")
 @RestController
 @RequestMapping("pms/spuinfo")
@@ -36,10 +33,9 @@ public class SpuInfoController {
     private SpuInfoService spuInfoService;
 
 
-
     @ApiOperation("根据分类id查询spu商品信息")//没有使用elk是mysql的模糊查询
     @GetMapping//http://127.0.0.1:8888/pms/spuinfo?t=1606121691107&page=1&limit=10&key=&catId=225
-    public Resp<PageVo> querySpuInfo(QueryCondition condition, @RequestParam("catId")Long cid){
+    public Resp<PageVo> querySpuInfo(QueryCondition condition, @RequestParam("catId") Long cid) {
         //SELECT * FROM `pms_spu_info` WHERE catalog_id =225 AND (id=3 OR spu_name LIKE "%华为%");
         PageVo page = this.spuInfoService.querySpuInfo(condition, cid);
         return Resp.ok(page);
@@ -64,8 +60,8 @@ public class SpuInfoController {
     @ApiOperation("详情查询")
     @GetMapping("/info/{id}")
     @PreAuthorize("hasAuthority('pms:spuinfo:info')")
-    public Resp<SpuInfoEntity> info(@PathVariable("id") Long id){
-		SpuInfoEntity spuInfo = spuInfoService.getById(id);
+    public Resp<SpuInfoEntity> info(@PathVariable("id") Long id) {
+        SpuInfoEntity spuInfo = spuInfoService.getById(id);
 
         return Resp.ok(spuInfo);
     }
@@ -76,8 +72,8 @@ public class SpuInfoController {
     @ApiOperation("保存spu")
     @PostMapping("/save")
     @PreAuthorize("hasAuthority('pms:spuinfo:save')")//security的注解
-    public Resp<Object> save(@RequestBody SpuInfoVO spuInfoVO){
-		spuInfoService.bigSave(spuInfoVO);//九张表
+    public Resp<Object> save(@RequestBody SpuInfoVO spuInfoVO) throws FileNotFoundException {
+        spuInfoService.bigSave(spuInfoVO);//九张表
         return Resp.ok(null);
     }
 
@@ -87,8 +83,8 @@ public class SpuInfoController {
     @ApiOperation("修改")
     @PostMapping("/update")
     @PreAuthorize("hasAuthority('pms:spuinfo:update')")
-    public Resp<Object> update(@RequestBody SpuInfoEntity spuInfo){
-		spuInfoService.updateById(spuInfo);
+    public Resp<Object> update(@RequestBody SpuInfoEntity spuInfo) {
+        spuInfoService.updateById(spuInfo);
 
         return Resp.ok(null);
     }
@@ -99,8 +95,8 @@ public class SpuInfoController {
     @ApiOperation("删除")
     @PostMapping("/delete")
     @PreAuthorize("hasAuthority('pms:spuinfo:delete')")
-    public Resp<Object> delete(@RequestBody Long[] ids){
-		spuInfoService.removeByIds(Arrays.asList(ids));
+    public Resp<Object> delete(@RequestBody Long[] ids) {
+        spuInfoService.removeByIds(Arrays.asList(ids));
 
         return Resp.ok(null);
     }
